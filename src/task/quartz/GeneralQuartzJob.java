@@ -8,7 +8,7 @@ import task.ExecutableTask;
 
 import java.util.HashMap;
 
-import static task.TaskManager.getTask;
+import static task.TaskManager.*;
 
 public class GeneralQuartzJob implements Job {
     private static final Logger logger = LoggerFactory.getLogger(GeneralQuartzJob.class);
@@ -16,15 +16,34 @@ public class GeneralQuartzJob implements Job {
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
         var task = getTask(jobDataMap.getString("taskId"));
-        var data = jobDataMap.getString("data");
-        HashMap<String, String> realData = new Gson().fromJson(data, HashMap.class);
-        logger.info("Processing task {}",task.getTaskId());
+        var data = jobDataMap.getString("body");
+        HashMap realData = new Gson().fromJson(data, HashMap.class);
+        logger.info("Processing task {}", task.getTaskId());
+
+        ExecutableTask executableTask;
+
         try {
-            task.getExecutableTask().executeTask(task.getTaskId().toString());
+            String className = realData.get("task_map_address").toString();
+
+            HashMap<String, String> reverTaskMapping = getReversedTaskMapping();
+
+            Class<? extends ExecutableTask> clazz = (Class<? extends ExecutableTask>) Class.forName(reverTaskMapping.get(className).toString());
+
+            executableTask = clazz.getDeclaredConstructor().newInstance();
+        } catch (ClassNotFoundException e) {
+            throw new JobExecutionException("Failed to resolve ExecutableTask class", e);
+        } catch (ReflectiveOperationException e) {
+            throw new JobExecutionException("Failed to instantiate ExecutableTask", e);
+        }
+
+        try {
+            executableTask.executeTask(task.getTaskId().toString());
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }
+
         task.setIsFinished(true);
-        logger.info("Successfully proceeded task {}",task.getTaskId());
+
+        logger.info("Successfully proceeded task {}", task.getTaskId());
     }
 }

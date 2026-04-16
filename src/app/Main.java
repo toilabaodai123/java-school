@@ -18,7 +18,7 @@ import java.util.Optional;
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     private static HashMap<String, String> config;
-    static void main(String[] args) throws InterruptedException, SchedulerException {
+    public static void main(String[] args) throws InterruptedException, SchedulerException {
         logger.info("Starting...");
 
         Main.start();

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import service.QuartzService;
 import task.quartz.GeneralQuartzJob;
 import task.quartz.SendAddedClassEmailJob;
+import task.quartz.SendAddedClassEmailTask;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -28,6 +29,14 @@ public class TaskManager {
 
     public static int getTaskQueueSize() {
         return taskQueue.size();
+    }
+
+    public static HashMap<String, String> taskMapping = new HashMap<>();
+
+    public static HashMap<String, String> reversedTaskMapping = new HashMap<>();
+
+    static {
+        initTaskMapping();
     }
 
     public static void initQueueJobService() throws SchedulerException {
@@ -66,11 +75,14 @@ public class TaskManager {
 
     public static void dispatch(ExecutableTask executableTask, HashMap<String, String> data) throws SchedulerException {
         UUID taskUUID = UUID.randomUUID();
+        var taskMap = getTaskMapping();
+        String taskMapAddress = taskMap.get(executableTask.getClass().getName());
 
         HashMap<String, Task> taskQueue = TaskManager.getTaskQueue();
 
         var Task = new Task(taskUUID);
         Task.setExecutableTask(executableTask);
+        data.put("task_map_address", taskMapAddress);
 
         taskQueue.put(Task.getTaskId().toString(), Task);
 
@@ -87,6 +99,19 @@ public class TaskManager {
         Scheduler scheduler = QuartzService.getScheduler();
 
         scheduler.scheduleJob(job, trigger);
+    }
+
+    private static void initTaskMapping() {
+        taskMapping.put(SendAddedClassEmailTask.class.getName(), "send_added_email_to_student");
+        reversedTaskMapping.put("send_added_email_to_student", SendAddedClassEmailTask.class.getName());
+    }
+
+    public static HashMap<String, String> getTaskMapping() {
+        return taskMapping;
+    }
+
+    public static HashMap<String, String> getReversedTaskMapping() {
+        return reversedTaskMapping;
     }
 
 }

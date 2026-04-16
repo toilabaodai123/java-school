@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import static task.TaskManager.getTask;
 
 public class SendAddedClassEmailJob implements Job {
-    private static final Logger logger = LoggerFactory.getLogger(SendAddedClassEmailTask.class);
+    private static final Logger logger = LoggerFactory.getLogger(SendAddedClassEmailJob.class);
 
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
