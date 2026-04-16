@@ -1,6 +1,7 @@
 package task;
 
 import app.Main;
+import com.google.gson.Gson;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
@@ -25,7 +26,7 @@ public class TaskManager {
         return taskQueue.get(uuid);
     }
 
-    public static int  getTaskQueueSize() {
+    public static int getTaskQueueSize() {
         return taskQueue.size();
     }
 
@@ -42,15 +43,15 @@ public class TaskManager {
     }
 
     private static QueueJob getQueueJobService(HashMap<String, String> config) throws SchedulerException {
-        String queue="internal";
+        String queue = "internal";
 
-        if(config.containsKey("task.queue")) {
+        if (config.containsKey("task.queue")) {
             queue = config.get("task.queue");
         }
 
         QueueJob queueJob = null;
 
-        switch (queue){
+        switch (queue) {
             case "internal":
                 queueJob = new QuartzService();
                 break;
@@ -63,37 +64,29 @@ public class TaskManager {
         return queueJob;
     }
 
-    public static void dispatch(ExecutableTask executableTask) throws SchedulerException {
+    public static void dispatch(ExecutableTask executableTask, HashMap<String, String> data) throws SchedulerException {
         UUID taskUUID = UUID.randomUUID();
-
-        try{
-            executableTask.executeTask(taskUUID.toString());
-        }catch (SchedulerException e){
-            logger.info("er1");
-        }catch (Exception ex){
-            logger.info("er2");
-        }
 
         HashMap<String, Task> taskQueue = TaskManager.getTaskQueue();
 
-        var Task =  new Task(taskUUID);
+        var Task = new Task(taskUUID);
         Task.setExecutableTask(executableTask);
 
-        taskQueue.put(Task.getTaskId().toString(),Task);
+        taskQueue.put(Task.getTaskId().toString(), Task);
 
         Trigger trigger = TriggerBuilder.newTrigger()
-                .startNow() // Run exactly at this date/time
+                .startNow()
                 .build();
 
         JobDetail job = JobBuilder.newJob(GeneralQuartzJob.class)
                 .withIdentity(taskUUID.toString())
                 .usingJobData("taskId", taskUUID.toString())
+                .usingJobData("body", new Gson().toJson(data))
                 .build();
 
         Scheduler scheduler = QuartzService.getScheduler();
 
         scheduler.scheduleJob(job, trigger);
     }
-
 
 }
