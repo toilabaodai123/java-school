@@ -8,3 +8,26 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: school
+      MYSQL_USER: school
+      MYSQL_PASSWORD: school
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

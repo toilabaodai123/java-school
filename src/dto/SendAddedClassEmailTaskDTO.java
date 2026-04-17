@@ -8,4 +8,8 @@ public class SendAddedClassEmailTaskDTO extends TaskDTO {
     public SendAddedClassEmailTaskDTO(String studentCode) {
         this.studentCode = studentCode;
     }
+
+    public String getStudentCode() {
+        return studentCode;
+    }
 }

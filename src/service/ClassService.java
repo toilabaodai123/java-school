@@ -11,10 +11,13 @@ import org.slf4j.LoggerFactory;
 import task.quartz.SendAddedClassEmailTask;
 import task.TaskManager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 public class ClassService {
+    private List<Class> classList = new ArrayList<Class>();
     private static final Logger logger = LoggerFactory.getLogger(ClassService.class);
 
     public Optional<HashMap<String, Student>> getClassStudents(Class clazz) {

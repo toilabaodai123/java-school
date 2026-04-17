@@ -1,9 +1,11 @@
 package model;
 
 public class Student extends Person {
+    private String email;
     public Student(){
         this.name = "default-student-name";
         this.code = "default-student-code";
+        this.email = "default-student-email";
     }
 
     public Student(String name, String code) {
@@ -24,5 +26,9 @@ public class Student extends Person {
     @Override
     public String work(){
         return "Learning...";
+    }
+
+    public String getEmail() {
+        return email;
     }
 }

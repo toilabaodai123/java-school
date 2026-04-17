@@ -36,11 +36,7 @@ public class GeneralQuartzJob implements Job {
             throw new SimpleJobExecutionException("Failed to resolve ExecutableTask class:" + e.getMessage(),null);
         }
 
-        try {
-            executableTask.execute(dtoData);
-        } catch (SchedulerException e) {
-            throw new RuntimeException(e);
-        }
+        executableTask.execute(dtoData);
 
         logger.info("Successfully proceeded task {}", dtoData.getTaskUUID());
     }

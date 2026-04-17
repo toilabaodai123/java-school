@@ -9,6 +9,8 @@ import exception.StudentAlreadyInClassException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.ClassService;
+import service.StudentService;
+import service.TeacherService;
 import task.TaskManager;
 
 import java.util.HashMap;
@@ -24,12 +26,17 @@ public class Main {
         logger.info("Starting...");
 
         Main.start();
-            var student = new Student("name-1","code-1");
-            var student2 = new Student("name-2","code-2");
-            var student3 = new Student("name-3","code-3");
-            var teacher = new Teacher();
-            var class1 = new Class("1");
-            var classService = new ClassService();
+        var studentService = new StudentService();
+        var teacherService = new TeacherService();
+        var classService = new ClassService();
+
+        Student student = studentService.addStudent(new Student("name-1","code-1"));
+        Student student2 = studentService.addStudent(new Student("name-2","code-2"));
+        Student student3 = studentService.addStudent(new Student("name-3","code-3"));
+        Teacher teacher = teacherService.addTeacher(new Teacher());
+        var class1 = new Class("1");
+
+
         try{
             classService.addStudentToClass(student,class1);
             classService.addStudentToClass(student,class1);
@@ -71,9 +78,11 @@ public class Main {
 
     private static HashMap<String, String> initConfig(){
         var config = new HashMap<String, String>();
-//        config.put("task.queue","internal");
-        config.put("task.queue.driver","rabbitmq");
+        config.put("task.queue","internal");
+//        config.put("task.queue.driver","rabbitmq");
         config.put("task.queue.host","localhost");
+        config.put("mail.host", "localhost");
+        config.put("mail.port", "1025");
 
         return config;
     }
