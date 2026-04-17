@@ -72,7 +72,9 @@ public class Main {
     private static HashMap<String, String> initConfig(){
         var config = new HashMap<String, String>();
 //        config.put("task.queue","internal");
-        config.put("task.queue","rabbitmq");
+        config.put("task.queue.driver","rabbitmq");
+        config.put("task.queue.host","localhost");
+
         return config;
     }
 

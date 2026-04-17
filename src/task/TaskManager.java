@@ -12,6 +12,7 @@ import task.quartz.GeneralQuartzJob;
 import task.quartz.SendAddedClassEmailTask;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class TaskManager {
@@ -59,8 +60,8 @@ public class TaskManager {
 
         String queue = "internal";
 
-        if (config.containsKey("task.queue")) {
-            queue = config.get("task.queue");
+        if (config.containsKey("task.queue.driver")) {
+            queue = config.get("task.queue.driver");
         }
 
         QueueJob queueJob = null;
@@ -106,6 +107,10 @@ public class TaskManager {
 
     public static HashMap<String, String> getReversedTaskMapping() {
         return reversedTaskMapping;
+    }
+
+    public static List<String> getNonCriticalTasks() {
+        return List.of("send_added_email_to_student");
     }
 
 }

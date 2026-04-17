@@ -1,22 +1,28 @@
 package task;
 
+import dto.TaskDTO;
+
 import java.util.HashMap;
 import java.util.UUID;
 
 public class Task {
-    private UUID taskId;
+    private String taskId;
+    private HashMap<String, String> metadata;
+    private TaskDTO body;
+    private int queueType;
     private Boolean isFinished;
 
-    public Task(UUID taskId) {
+    public Task(String taskId) {
         this.taskId = taskId;
+        this.queueType = 1;
         this.isFinished = false;
     }
 
-    public UUID getTaskId() {
+    public String getTaskId() {
         return taskId;
     }
 
-    public void setTaskId(UUID taskId) {
+    public void setTaskId(String taskId) {
         this.taskId = taskId;
     }
 
@@ -26,5 +32,29 @@ public class Task {
 
     public void setIsFinished(Boolean isFinished) {
         this.isFinished = isFinished;
+    }
+
+    public HashMap<String, String> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(HashMap<String, String> metadata) {
+        this.metadata = metadata;
+    }
+
+    public TaskDTO getBody() {
+        return body;
+    }
+
+    public void setBody(TaskDTO body) {
+        this.body = body;
+    }
+
+    public int getQueueType() {
+        return queueType;
+    }
+
+    public void setQueueType(int queueType) {
+        this.queueType = queueType;
     }
 }
