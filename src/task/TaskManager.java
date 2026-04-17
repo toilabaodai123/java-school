@@ -78,8 +78,9 @@ public class TaskManager {
         HashMap<String, Task> taskQueue = TaskManager.getTaskQueue();
 
         var Task = new Task(taskUUID);
-        data.put("task_map_address", taskMapAddress);
-        data.put("task_id",taskUUID.toString());
+
+        taskDTO.setTaskMapAddress(taskMapAddress);
+        taskDTO.setTaskUUID(taskUUID.toString());
 
         taskQueue.put(Task.getTaskId().toString(), Task);
 

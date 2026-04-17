@@ -20,6 +20,6 @@ public class SendAddedClassEmailTask implements ExecutableTask {
 
     @Override
     public void execute(SendAddedClassEmailTaskDTO sendAddedClassEmailTaskDTO) throws SchedulerException {
-        logger.info("Handled task {}",taskDTO.getTaskUUID().toString());
+        logger.info("Handled task {}",sendAddedClassEmailTaskDTO.getTaskUUID());
     }
 }

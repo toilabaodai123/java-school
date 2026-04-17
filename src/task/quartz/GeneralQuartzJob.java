@@ -1,6 +1,7 @@
 package task.quartz;
 
 import com.google.gson.Gson;
+import dto.SendAddedClassEmailTaskDTO;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,15 +16,16 @@ public class GeneralQuartzJob implements Job {
 
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
-        var task = getTask(jobDataMap.getString("taskId"));
         var dto = jobDataMap.getString("dto");
-        HashMap dtoData = new Gson().fromJson(dto, HashMap.class);
+        SendAddedClassEmailTaskDTO dtoData = new Gson().fromJson(dto, SendAddedClassEmailTaskDTO.class);
+
+        var task = getTask(dtoData.getTaskUUID());
         logger.info("Processing task {}", task.getTaskId());
 
         ExecutableTask executableTask;
 
         try {
-            String className = dtoData.get("task_map_address").toString();
+            String className = dtoData.getTaskMapAddress();
 
             HashMap<String, String> reverTaskMapping = getReversedTaskMapping();
 
@@ -37,7 +39,7 @@ public class GeneralQuartzJob implements Job {
         }
 
         try {
-            executableTask.executeTask();
+            executableTask.execute(dtoData);
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }
