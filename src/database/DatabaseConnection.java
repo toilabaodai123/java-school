@@ -1,20 +1,18 @@
 package database;
 
+import app.Main;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    public Connection getConnection() throws ClassNotFoundException, SQLException {
-        String url= "jdbc:mysql://localhost:3306/school";
-        String user = "school";
-        String password = "school";
+    public static Connection getConnection() throws SQLException {
+        var config = Main.getConfig();
+        String url = config.get("db.url");
+        String user = config.get("db.user");
+        String password = config.get("db.password");
 
-        try (Connection conn = DriverManager.getConnection(url, user, password){
-            return conn;
-        } catch(SQLException e){
-            e.printStackTrace();
-        }
+        return DriverManager.getConnection(url, user, password);
     }
 }

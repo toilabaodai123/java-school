@@ -8,9 +8,10 @@ public class Student extends Person {
         this.email = "default-student-email";
     }
 
-    public Student(String name, String code) {
+    public Student(String name, String code, String email) {
         this.name = name;
         this.code = code;
+        this.email = email;
     }
 
     @Override
@@ -30,5 +31,9 @@ public class Student extends Person {
 
     public String getEmail() {
         return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

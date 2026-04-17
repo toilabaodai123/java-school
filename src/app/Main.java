@@ -1,11 +1,15 @@
 package app;
 
+import database.DatabaseInitializer;
+import dto.AddStudentToClassDTO;
+import dto.CreateClassDTO;
+import dto.CreateStudentDTO;
+import dto.RemoveStudentFromClassDTO;
 import exception.StudentAlreadyInClassException;
 import model.Class;
 import model.Student;
 import model.Teacher;
 import exception.QueueJobException;
-import exception.StudentAlreadyInClassException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.ClassService;
@@ -13,7 +17,9 @@ import service.StudentService;
 import service.TeacherService;
 import task.TaskManager;
 
+import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -22,7 +28,7 @@ import java.util.Optional;
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     private static HashMap<String, String> config;
-    public static void main(String[] args) throws InterruptedException, QueueJobException, StudentAlreadyInClassException {
+    public static void main(String[] args) throws InterruptedException, QueueJobException, StudentAlreadyInClassException, SQLException {
         logger.info("Starting...");
 
         Main.start();
@@ -30,33 +36,42 @@ public class Main {
         var teacherService = new TeacherService();
         var classService = new ClassService();
 
-        Student student = studentService.addStudent(new Student("name-1","code-1"));
-        Student student2 = studentService.addStudent(new Student("name-2","code-2"));
-        Student student3 = studentService.addStudent(new Student("name-3","code-3"));
+        var createStudentDTO_1 = new CreateStudentDTO("code-1","name-1","email-1");
+        var createStudentDTO_2 = new CreateStudentDTO("code-2","name-2","email-2");
+        var createStudentDTO_3 = new CreateStudentDTO("code-3","name-3","email-3");
+
+        Student student_1 = studentService.createStudent(createStudentDTO_1);
+        Student student_2 = studentService.createStudent(createStudentDTO_2);
+        Student student_3 = studentService.createStudent(createStudentDTO_3);
         Teacher teacher = teacherService.addTeacher(new Teacher());
-        var class1 = new Class("1");
+
+        var createClassDTO = new CreateClassDTO("code-1");
+        Class clazz = classService.createClass(createClassDTO);
 
 
         try{
-            classService.addStudentToClass(student,class1);
-            classService.addStudentToClass(student,class1);
-            classService.addStudentToClass(student2,class1);
-            classService.setTeacherToClass(teacher,class1);
-            Optional<HashMap<String, Student>> class1Students = classService.getClassStudents(class1);
-            logger.info("model.Class {} has {} students",class1.getCode(), class1Students.map(h -> h.size()).orElse(0));
-            classService.removeStudentFromClass(student,class1);
-            classService.removeStudentFromClass(student3,class1);
-            logger.info("model.Class {} has {} students",class1.getCode(), class1Students.map(h -> h.size()).orElse(0));
+            classService.addStudentToClass(new AddStudentToClassDTO(student_1.getCode(), clazz.getCode()));
+            classService.addStudentToClass(new AddStudentToClassDTO(student_2.getCode(), clazz.getCode()));
+            classService.addStudentToClass(new AddStudentToClassDTO(student_3.getCode(), clazz.getCode()));
+            classService.setTeacherToClass(teacher,clazz);
+            List<Student> class1Students = classService.getClassStudents(clazz);
+            logger.info("model.Class {} has {} students",clazz.getCode(), class1Students.size());
+            var removeStudentFromClass = new RemoveStudentFromClassDTO(student_1,clazz);
+            classService.removeStudentFromClass(student_1,clazz);
+            classService.removeStudentFromClass(student_2,clazz);
+            class1Students = classService.getClassStudents(clazz);
+            logger.info("model.Class {} has {} students",clazz.getCode(), class1Students.size());
 
         }catch(StudentAlreadyInClassException e){
-            logger.error("Student with code {} already exists in class {}, message error: {}", student.getCode(), class1.getCode(),e.getMessage());
+//            logger.error("Student with code {} already exists in class {}, message error: {}", student.getCode(), class1.getCode(),e.getMessage());
         }
 
 
     }
 
-    private static void start() throws QueueJobException {
+    private static void start() throws QueueJobException, SQLException {
         config = initConfig();
+        DatabaseInitializer.initialize();
         TaskManager.initQueueJobService();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -83,6 +98,9 @@ public class Main {
         config.put("task.queue.host","localhost");
         config.put("mail.host", "localhost");
         config.put("mail.port", "1025");
+        config.put("db.url", "jdbc:mysql://localhost:3306/school");
+        config.put("db.user", "school");
+        config.put("db.password", "school");
 
         return config;
     }

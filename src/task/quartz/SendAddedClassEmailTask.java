@@ -11,6 +11,7 @@ import service.EmailService;
 import service.StudentService;
 import task.ExecutableTask;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 
 public class SendAddedClassEmailTask implements ExecutableTask {
@@ -18,7 +19,7 @@ public class SendAddedClassEmailTask implements ExecutableTask {
     private static final Logger logger = LoggerFactory.getLogger(SendAddedClassEmailTask.class);
 
     @Override
-    public void execute(SendAddedClassEmailTaskDTO dto) {
+    public void execute(SendAddedClassEmailTaskDTO dto) throws SQLException {
         var studentService = new StudentService();
         var student = studentService.getStudentByCode(dto.getStudentCode());
         logger.info("Handling task {}, request info: {}", dto.getTaskUUID(), new Gson().toJson(dto));

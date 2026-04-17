@@ -1,5 +1,7 @@
 package service;
 
+import dto.AddStudentToClassDTO;
+import dto.CreateClassDTO;
 import dto.SendAddedClassEmailTaskDTO;
 import exception.QueueJobException;
 import exception.StudentAlreadyInClassException;
@@ -8,47 +10,59 @@ import model.Student;
 import model.Teacher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import repository.ClassRepository;
+import repository.StudentRepository;
 import task.quartz.SendAddedClassEmailTask;
 import task.TaskManager;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 public class ClassService {
-    private List<Class> classList = new ArrayList<Class>();
     private static final Logger logger = LoggerFactory.getLogger(ClassService.class);
 
-    public Optional<HashMap<String, Student>> getClassStudents(Class clazz) {
-        return Optional.ofNullable(clazz.getStudents());
+
+    public Class createClass(CreateClassDTO createClassDTO) throws SQLException {
+        ClassRepository classRepository = new ClassRepository();
+        Class clazz = new Class(createClassDTO.getCode());
+        classRepository.createClass(clazz);
+        return clazz;
+    }
+    public List<Student> getClassStudents(Class clazz) throws SQLException {
+        ClassRepository classRepository = new ClassRepository();
+        return classRepository.getClassStudents(clazz);
     }
 
-    public void addStudentToClass(Student student, Class clazz) throws QueueJobException, StudentAlreadyInClassException {
-        if (clazz.getStudents().containsKey(student.getCode())) {
-            logger.info("Student with code {} already exists in class {}", student.getCode(), clazz.getCode());
-//            throw new StudentAlreadyInClassException();
-        } else {
-            clazz.addStudent(student);
-            logger.info("Class {} just added student {}", clazz.getCode(), student.getName());
-            SendAddedClassEmailTaskDTO sendAddedClassEmailTaskDTO = new SendAddedClassEmailTaskDTO(student.getCode());
-            TaskManager.dispatch(new SendAddedClassEmailTask(), sendAddedClassEmailTaskDTO);
-        }
+    public void addStudentToClass(AddStudentToClassDTO dto)
+            throws QueueJobException, StudentAlreadyInClassException, SQLException {
+        ClassRepository classRepository = new ClassRepository();
+        StudentRepository studentRepository = new StudentRepository();
+
+        Class clazz = classRepository.getClassByCode(dto.getClassCode());
+        Optional<Student> student = studentRepository.getStudentByCode(dto.getStudentCode());
+
+        Student resolvedStudent = student.orElseThrow(() ->
+                new RuntimeException("Student not found: " + dto.getStudentCode()));
+
+        classRepository.addStudentToClass(clazz, resolvedStudent);
+        logger.info("Class {} just added student {}", clazz.getCode(), resolvedStudent.getCode());
+        SendAddedClassEmailTaskDTO sendAddedClassEmailTaskDTO = new SendAddedClassEmailTaskDTO(resolvedStudent.getCode());
+        TaskManager.dispatch(new SendAddedClassEmailTask(), sendAddedClassEmailTaskDTO);
     }
 
-    public void setTeacherToClass(Teacher teacher, Class clazz) {
-        clazz.setTeacher(teacher);
+    public void setTeacherToClass(Teacher teacher, Class clazz) throws SQLException {
+        ClassRepository classRepository = new ClassRepository();
+        classRepository.setTeacherToClass(clazz, teacher);
         logger.info("Class {} just updated teacher {}", clazz.getCode(), teacher.getName());
     }
 
-    public void removeStudentFromClass(Student student, Class clazz) {
-        HashMap<String, Student> students = clazz.getStudents();
-
-        if (!students.containsKey(student.getCode())) {
-            logger.error("Class {} does not have student code {}", clazz.getCode(), student.getCode());
-        } else {
-            students.remove(student.getCode());
-        }
+    public void removeStudentFromClass(Student student, Class clazz) throws SQLException {
+        ClassRepository classRepository = new ClassRepository();
+        classRepository.removeStudentFromClass(clazz, student);
+        logger.info("Removed student {} from class {}", student.getCode(), clazz.getCode());
     }
 
     private void sendAddStudentToClass(Student student) {

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import task.ExecutableTask;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 
 import static task.TaskManager.*;
@@ -36,7 +37,11 @@ public class GeneralQuartzJob implements Job {
             throw new SimpleJobExecutionException("Failed to resolve ExecutableTask class:" + e.getMessage(),null);
         }
 
-        executableTask.execute(dtoData);
+        try {
+            executableTask.execute(dtoData);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         logger.info("Successfully proceeded task {}", dtoData.getTaskUUID());
     }

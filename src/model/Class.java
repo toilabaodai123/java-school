@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Optional;
 
 public class Class {
+    private long id;
     private String code;
     private HashMap<String, Student> students;
     private Optional<Teacher> teacher = Optional.empty();
@@ -41,5 +42,13 @@ public class Class {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

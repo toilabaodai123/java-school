@@ -1,10 +1,19 @@
 package model;
 
 public abstract class Person {
+    protected long id;
     protected String code;
     protected String name;
 
     protected abstract String work();
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
