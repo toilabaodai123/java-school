@@ -56,9 +56,10 @@ public class Main {
             classService.setTeacherToClass(teacher,clazz);
             List<Student> class1Students = classService.getClassStudents(clazz);
             logger.info("model.Class {} has {} students",clazz.getCode(), class1Students.size());
-            var removeStudentFromClass = new RemoveStudentFromClassDTO(student_1,clazz);
-            classService.removeStudentFromClass(student_1,clazz);
-            classService.removeStudentFromClass(student_2,clazz);
+            var removeStudent1FromClass = new RemoveStudentFromClassDTO(student_1,clazz);
+            var removeStudent2FromClass = new RemoveStudentFromClassDTO(student_2,clazz);
+            classService.removeStudentFromClass(removeStudent1FromClass);
+            classService.removeStudentFromClass(removeStudent2FromClass);
             class1Students = classService.getClassStudents(clazz);
             logger.info("model.Class {} has {} students",clazz.getCode(), class1Students.size());
 
@@ -108,5 +109,4 @@ public class Main {
     public static HashMap<String, String> getConfig() {
         return config;
     }
-
 }

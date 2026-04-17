@@ -6,17 +6,20 @@ import dto.TaskDTO;
 import exception.QueueJobException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import repository.TaskRepository;
 import service.QuartzService;
 import service.RabbitMQService;
 import task.quartz.GeneralQuartzJob;
 import task.quartz.SendAddedClassEmailTask;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
 public class TaskManager {
     private static final Logger logger = LoggerFactory.getLogger(TaskManager.class);
+    private static final TaskRepository taskRepository = new TaskRepository();
 
     private static HashMap<String, Task> taskQueue = new HashMap<>();
 
@@ -88,7 +91,30 @@ public class TaskManager {
         taskDTO.setTaskMapAddress(taskMapAddress);
         taskDTO.setTaskUUID(taskUUID.toString());
 
-        queueJob.dispatchTask(taskUUID.toString(), taskDTO);
+        try {
+            queueJob.dispatchTask(taskUUID.toString(), taskDTO);
+        } catch (QueueJobException e) {
+            var nonCriticalTasks = getNonCriticalTasks();
+            if (nonCriticalTasks.contains(taskMapAddress)) {
+                logger.warn("Queue dispatch failed for non-critical task {}, falling back", taskUUID, e);
+
+                // save to db
+                try {
+                    taskRepository.saveFailedTask(taskUUID.toString(), taskDTO, 2);
+                } catch (SQLException sqlEx) {
+                    logger.error("Failed to persist task {} to database, falling back to in-memory only", taskUUID, sqlEx);
+                }
+
+                // save to in-memory
+                var task = new Task(taskUUID.toString());
+                task.setQueueType(2);
+                task.setBody(taskDTO);
+                taskQueue.put(taskUUID.toString(), task);
+                logger.info("Dispatched task {} to in-memory, {}", taskUUID, new Gson().toJson(task));
+                return;
+            }
+            throw e;
+        }
     }
 
     private static void initTaskMapping() {

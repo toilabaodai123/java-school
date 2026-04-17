@@ -2,6 +2,7 @@ package service;
 
 import dto.AddStudentToClassDTO;
 import dto.CreateClassDTO;
+import dto.RemoveStudentFromClassDTO;
 import dto.SendAddedClassEmailTaskDTO;
 import exception.QueueJobException;
 import exception.StudentAlreadyInClassException;
@@ -28,8 +29,7 @@ public class ClassService {
     public Class createClass(CreateClassDTO createClassDTO) throws SQLException {
         ClassRepository classRepository = new ClassRepository();
         Class clazz = new Class(createClassDTO.getCode());
-        classRepository.createClass(clazz);
-        return clazz;
+        return classRepository.createClass(clazz);
     }
     public List<Student> getClassStudents(Class clazz) throws SQLException {
         ClassRepository classRepository = new ClassRepository();
@@ -59,10 +59,10 @@ public class ClassService {
         logger.info("Class {} just updated teacher {}", clazz.getCode(), teacher.getName());
     }
 
-    public void removeStudentFromClass(Student student, Class clazz) throws SQLException {
+    public void removeStudentFromClass(RemoveStudentFromClassDTO removeStudentFromClassDTO) throws SQLException {
         ClassRepository classRepository = new ClassRepository();
-        classRepository.removeStudentFromClass(clazz, student);
-        logger.info("Removed student {} from class {}", student.getCode(), clazz.getCode());
+        classRepository.removeStudentFromClass(removeStudentFromClassDTO.getClazz(), removeStudentFromClassDTO.getStudent());
+        logger.info("Removed student {} from class {}", removeStudentFromClassDTO.getStudent().getCode(), removeStudentFromClassDTO.getClazz().getCode());
     }
 
     private void sendAddStudentToClass(Student student) {

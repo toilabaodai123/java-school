@@ -10,13 +10,10 @@ import exception.QueueJobException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import task.QueueJob;
-import task.Task;
-import task.TaskManager;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 public class RabbitMQService implements QueueJob {
@@ -63,20 +60,8 @@ public class RabbitMQService implements QueueJob {
             channel.basicPublish(EXCHANGE_NAME, routingKey, null, message.getBytes(StandardCharsets.UTF_8));
             logger.info("Dispatched task {} to RabbitMQ", taskUUID);
         } catch (IOException e) {
-            var nonCriticalTasks = TaskManager.getNonCriticalTasks();
-            if(nonCriticalTasks.contains(taskDTO.getTaskMapAddress())){
-                //save to db(todo)
-
-                //save to in-memory
-                var taskQueue = TaskManager.getTaskQueue();
-                var task = new Task(taskUUID);
-                task.setQueueType(2);
-                task.setBody(taskDTO);
-                taskQueue.put(taskUUID,task);
-                logger.info("Dispatched task {} to in-memory, {}", taskUUID, new Gson().toJson(task));
-                return;
-            }
             throw new QueueJobException("Failed to dispatch task to RabbitMQ", e);
         }
     }
 }
+
