@@ -30,25 +30,32 @@ public class TaskManager {
 
     public static HashMap<String, String> reversedTaskMapping = new HashMap<>();
 
+    private static QueueJob queueJob = null;
+
     static {
         initTaskMapping();
+        try {
+            initQueueJob();
+        } catch (SchedulerException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void initQueueJobService() throws SchedulerException {
         logger.info("Initializing QueueJob Service...");
-        HashMap<String, String> config = Main.getConfig();
-        QueueJob queueJobService = getQueueJobService(config);
-        queueJobService.init();
+        queueJob.init();
     }
 
     public static void shutdownQueueJobService() throws SchedulerException {
         logger.info("Shutting down QueueJob Service...");
-        HashMap<String, String> config = Main.getConfig();
-        QueueJob queueJobService = getQueueJobService(config);
-        queueJobService.shutdown();
+        queueJob.shutdown();
     }
 
     private static QueueJob getQueueJobService(HashMap<String, String> config) throws SchedulerException {
+        if (queueJob != null) {
+            return queueJob;
+        }
+
         String queue = "internal";
 
         if (config.containsKey("task.queue")) {
@@ -75,32 +82,20 @@ public class TaskManager {
         var taskMap = getTaskMapping();
         String taskMapAddress = taskMap.get(executableTask.getClass().getName());
 
-        HashMap<String, Task> taskQueue = TaskManager.getTaskQueue();
-
-        var Task = new Task(taskUUID);
-
         taskDTO.setTaskMapAddress(taskMapAddress);
         taskDTO.setTaskUUID(taskUUID.toString());
 
-        taskQueue.put(Task.getTaskId().toString(), Task);
-
-        Trigger trigger = TriggerBuilder.newTrigger()
-                .startNow()
-                .build();
-
-        JobDetail job = JobBuilder.newJob(GeneralQuartzJob.class)
-                .withIdentity(taskUUID.toString())
-                .usingJobData("dto", new Gson().toJson(taskDTO))
-                .build();
-
-        Scheduler scheduler = QuartzService.getScheduler();
-
-        scheduler.scheduleJob(job, trigger);
+        queueJob.dispatchTask(taskUUID.toString(), taskDTO);
     }
 
     private static void initTaskMapping() {
         taskMapping.put(SendAddedClassEmailTask.class.getName(), "send_added_email_to_student");
         reversedTaskMapping.put("send_added_email_to_student", SendAddedClassEmailTask.class.getName());
+    }
+
+    private static void initQueueJob() throws SchedulerException {
+        HashMap<String, String> config = Main.getConfig();
+        queueJob = getQueueJobService(config);
     }
 
     public static HashMap<String, String> getTaskMapping() {

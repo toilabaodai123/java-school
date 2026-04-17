@@ -1,8 +1,7 @@
 package service;
 
-import com.google.gson.Gson;
 import dto.SendAddedClassEmailTaskDTO;
-import dto.TaskDTO;
+import exception.StudentAlreadyInClassException;
 import model.Class;
 import model.Student;
 import model.Teacher;
@@ -22,9 +21,10 @@ public class ClassService {
         return Optional.ofNullable(clazz.getStudents());
     }
 
-    public void addStudentToClass(Student student, Class clazz) throws SchedulerException {
+    public void addStudentToClass(Student student, Class clazz) throws SchedulerException, StudentAlreadyInClassException {
         if (clazz.getStudents().containsKey(student.getCode())) {
             logger.info("Student with code {} already exists in class {}", student.getCode(), clazz.getCode());
+//            throw new StudentAlreadyInClassException();
         } else {
             clazz.addStudent(student);
             logger.info("Class {} just added student {}", clazz.getCode(), student.getName());

@@ -1,5 +1,6 @@
 package task.quartz;
 
+import com.google.gson.Gson;
 import dto.SendAddedClassEmailTaskDTO;
 import dto.TaskDTO;
 import model.Student;
@@ -20,6 +21,6 @@ public class SendAddedClassEmailTask implements ExecutableTask {
 
     @Override
     public void execute(SendAddedClassEmailTaskDTO sendAddedClassEmailTaskDTO) throws SchedulerException {
-        logger.info("Handled task {}",sendAddedClassEmailTaskDTO.getTaskUUID());
+        logger.info("Handled task {}, request info:{}",sendAddedClassEmailTaskDTO.getTaskUUID(),new Gson().toJson(sendAddedClassEmailTaskDTO));
     }
 }
