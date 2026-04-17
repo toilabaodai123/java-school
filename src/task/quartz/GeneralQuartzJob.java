@@ -16,14 +16,14 @@ public class GeneralQuartzJob implements Job {
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
         var task = getTask(jobDataMap.getString("taskId"));
-        var data = jobDataMap.getString("body");
-        HashMap realData = new Gson().fromJson(data, HashMap.class);
+        var dto = jobDataMap.getString("dto");
+        HashMap dtoData = new Gson().fromJson(dto, HashMap.class);
         logger.info("Processing task {}", task.getTaskId());
 
         ExecutableTask executableTask;
 
         try {
-            String className = realData.get("task_map_address").toString();
+            String className = dtoData.get("task_map_address").toString();
 
             HashMap<String, String> reverTaskMapping = getReversedTaskMapping();
 
@@ -37,7 +37,7 @@ public class GeneralQuartzJob implements Job {
         }
 
         try {
-            executableTask.executeTask(task.getTaskId().toString());
+            executableTask.executeTask();
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }

@@ -1,5 +1,7 @@
 package task.quartz;
 
+import dto.SendAddedClassEmailTaskDTO;
+import dto.TaskDTO;
 import model.Student;
 import org.quartz.*;
 import org.slf4j.Logger;
@@ -17,7 +19,7 @@ public class SendAddedClassEmailTask implements ExecutableTask {
     private static final Logger logger = LoggerFactory.getLogger(SendAddedClassEmailTask.class);
 
     @Override
-    public void executeTask(String taskId) throws SchedulerException {
-        logger.info("Handled task {}",taskId);
+    public void execute(SendAddedClassEmailTaskDTO sendAddedClassEmailTaskDTO) throws SchedulerException {
+        logger.info("Handled task {}",taskDTO.getTaskUUID().toString());
     }
 }

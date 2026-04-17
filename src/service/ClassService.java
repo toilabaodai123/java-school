@@ -1,5 +1,8 @@
 package service;
 
+import com.google.gson.Gson;
+import dto.SendAddedClassEmailTaskDTO;
+import dto.TaskDTO;
 import model.Class;
 import model.Student;
 import model.Teacher;
@@ -21,26 +24,25 @@ public class ClassService {
 
     public void addStudentToClass(Student student, Class clazz) throws SchedulerException {
         if (clazz.getStudents().containsKey(student.getCode())) {
-            logger.info("model.Student with code {} already exists in class {}", student.getCode(), clazz.getCode());
+            logger.info("Student with code {} already exists in class {}", student.getCode(), clazz.getCode());
         } else {
             clazz.addStudent(student);
-            logger.info("model.Class {} just added student {}", clazz.getCode(), student.getName());
-            HashMap<String, String> data = new HashMap<>();
-            data.put("student_code", student.getCode());
-            TaskManager.dispatch(new SendAddedClassEmailTask(), data);
+            logger.info("Class {} just added student {}", clazz.getCode(), student.getName());
+            SendAddedClassEmailTaskDTO sendAddedClassEmailTaskDTO = new SendAddedClassEmailTaskDTO(student.getCode());
+            TaskManager.dispatch(new SendAddedClassEmailTask(), sendAddedClassEmailTaskDTO);
         }
     }
 
     public void setTeacherToClass(Teacher teacher, Class clazz) {
         clazz.setTeacher(teacher);
-        logger.info("model.Class {} just updated teacher {}", clazz.getCode(), teacher.getName());
+        logger.info("Class {} just updated teacher {}", clazz.getCode(), teacher.getName());
     }
 
     public void removeStudentFromClass(Student student, Class clazz) {
         HashMap<String, Student> students = clazz.getStudents();
 
         if (!students.containsKey(student.getCode())) {
-            logger.error("model.Class {} does not have student code {}", clazz.getCode(), student.getCode());
+            logger.error("Class {} does not have student code {}", clazz.getCode(), student.getCode());
         } else {
             students.remove(student.getCode());
         }

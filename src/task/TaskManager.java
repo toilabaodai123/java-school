@@ -2,13 +2,12 @@ package task;
 
 import app.Main;
 import com.google.gson.Gson;
+import dto.TaskDTO;
 import org.quartz.*;
-import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.QuartzService;
 import task.quartz.GeneralQuartzJob;
-import task.quartz.SendAddedClassEmailJob;
 import task.quartz.SendAddedClassEmailTask;
 
 import java.util.HashMap;
@@ -27,10 +26,6 @@ public class TaskManager {
         return taskQueue.get(uuid);
     }
 
-    public static int getTaskQueueSize() {
-        return taskQueue.size();
-    }
-
     public static HashMap<String, String> taskMapping = new HashMap<>();
 
     public static HashMap<String, String> reversedTaskMapping = new HashMap<>();
@@ -40,12 +35,14 @@ public class TaskManager {
     }
 
     public static void initQueueJobService() throws SchedulerException {
+        logger.info("Initializing QueueJob Service...");
         HashMap<String, String> config = Main.getConfig();
         QueueJob queueJobService = getQueueJobService(config);
         queueJobService.init();
     }
 
     public static void shutdownQueueJobService() throws SchedulerException {
+        logger.info("Shutting down QueueJob Service...");
         HashMap<String, String> config = Main.getConfig();
         QueueJob queueJobService = getQueueJobService(config);
         queueJobService.shutdown();
@@ -73,7 +70,7 @@ public class TaskManager {
         return queueJob;
     }
 
-    public static void dispatch(ExecutableTask executableTask, HashMap<String, String> data) throws SchedulerException {
+    public static void dispatch(ExecutableTask executableTask, TaskDTO taskDTO) throws SchedulerException {
         UUID taskUUID = UUID.randomUUID();
         var taskMap = getTaskMapping();
         String taskMapAddress = taskMap.get(executableTask.getClass().getName());
@@ -81,8 +78,8 @@ public class TaskManager {
         HashMap<String, Task> taskQueue = TaskManager.getTaskQueue();
 
         var Task = new Task(taskUUID);
-        Task.setExecutableTask(executableTask);
         data.put("task_map_address", taskMapAddress);
+        data.put("task_id",taskUUID.toString());
 
         taskQueue.put(Task.getTaskId().toString(), Task);
 
@@ -92,8 +89,7 @@ public class TaskManager {
 
         JobDetail job = JobBuilder.newJob(GeneralQuartzJob.class)
                 .withIdentity(taskUUID.toString())
-                .usingJobData("taskId", taskUUID.toString())
-                .usingJobData("body", new Gson().toJson(data))
+                .usingJobData("dto", new Gson().toJson(taskDTO))
                 .build();
 
         Scheduler scheduler = QuartzService.getScheduler();

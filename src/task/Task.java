@@ -5,7 +5,6 @@ import java.util.UUID;
 
 public class Task {
     private UUID taskId;
-    private ExecutableTask  executableTask;
     private Boolean isFinished;
 
     public Task(UUID taskId) {
@@ -27,13 +26,5 @@ public class Task {
 
     public void setIsFinished(Boolean isFinished) {
         this.isFinished = isFinished;
-    }
-
-    public ExecutableTask getExecutableTask() {
-        return executableTask;
-    }
-
-    public void setExecutableTask(ExecutableTask executableTask) {
-        this.executableTask = executableTask;
     }
 }
