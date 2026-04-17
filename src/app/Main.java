@@ -4,7 +4,8 @@ import exception.StudentAlreadyInClassException;
 import model.Class;
 import model.Student;
 import model.Teacher;
-import org.quartz.SchedulerException;
+import exception.QueueJobException;
+import exception.StudentAlreadyInClassException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.ClassService;
@@ -19,7 +20,7 @@ import java.util.Optional;
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     private static HashMap<String, String> config;
-    public static void main(String[] args) throws InterruptedException, SchedulerException, StudentAlreadyInClassException {
+    public static void main(String[] args) throws InterruptedException, QueueJobException, StudentAlreadyInClassException {
         logger.info("Starting...");
 
         Main.start();
@@ -47,22 +48,22 @@ public class Main {
 
     }
 
-    private static void start() throws SchedulerException {
+    private static void start() throws QueueJobException {
         config = initConfig();
         TaskManager.initQueueJobService();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.info("Shutting down...");
             try {
                 Main.shutdown();
-            } catch (SchedulerException e) {
+            } catch (QueueJobException e) {
                 throw new RuntimeException(e);
             }
-            logger.info("Shutting down...");
         }));
 
         logger.info("Starting completed!...");
     }
-    private static void shutdown() throws SchedulerException {
+    private static void shutdown() throws QueueJobException {
         TaskManager.shutdownQueueJobService();
 
         logger.info("Shutting down completed!...");
@@ -70,8 +71,8 @@ public class Main {
 
     private static HashMap<String, String> initConfig(){
         var config = new HashMap<String, String>();
-        config.put("task.queue","internal");
-
+//        config.put("task.queue","internal");
+        config.put("task.queue","rabbitmq");
         return config;
     }
 

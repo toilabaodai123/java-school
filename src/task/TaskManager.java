@@ -3,10 +3,11 @@ package task;
 import app.Main;
 import com.google.gson.Gson;
 import dto.TaskDTO;
-import org.quartz.*;
+import exception.QueueJobException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.QuartzService;
+import service.RabbitMQService;
 import task.quartz.GeneralQuartzJob;
 import task.quartz.SendAddedClassEmailTask;
 
@@ -36,22 +37,22 @@ public class TaskManager {
         initTaskMapping();
         try {
             initQueueJob();
-        } catch (SchedulerException e) {
+        } catch (QueueJobException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static void initQueueJobService() throws SchedulerException {
+    public static void initQueueJobService() throws QueueJobException {
         logger.info("Initializing QueueJob Service...");
         queueJob.init();
     }
 
-    public static void shutdownQueueJobService() throws SchedulerException {
+    public static void shutdownQueueJobService() throws QueueJobException {
         logger.info("Shutting down QueueJob Service...");
         queueJob.shutdown();
     }
 
-    private static QueueJob getQueueJobService(HashMap<String, String> config) throws SchedulerException {
+    private static QueueJob getQueueJobService(HashMap<String, String> config) {
         if (queueJob != null) {
             return queueJob;
         }
@@ -68,7 +69,8 @@ public class TaskManager {
             case "internal":
                 queueJob = new QuartzService();
                 break;
-            case "external":
+            case "rabbitmq":
+                queueJob = new RabbitMQService();
                 break;
             default:
                 throw new IllegalArgumentException("Unknown queue type");
@@ -77,7 +79,7 @@ public class TaskManager {
         return queueJob;
     }
 
-    public static void dispatch(ExecutableTask executableTask, TaskDTO taskDTO) throws SchedulerException {
+    public static void dispatch(ExecutableTask executableTask, TaskDTO taskDTO) throws QueueJobException {
         UUID taskUUID = UUID.randomUUID();
         var taskMap = getTaskMapping();
         String taskMapAddress = taskMap.get(executableTask.getClass().getName());
@@ -93,7 +95,7 @@ public class TaskManager {
         reversedTaskMapping.put("send_added_email_to_student", SendAddedClassEmailTask.class.getName());
     }
 
-    private static void initQueueJob() throws SchedulerException {
+    private static void initQueueJob() throws QueueJobException {
         HashMap<String, String> config = Main.getConfig();
         queueJob = getQueueJobService(config);
     }

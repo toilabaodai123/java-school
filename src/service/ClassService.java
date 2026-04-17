@@ -1,11 +1,11 @@
 package service;
 
 import dto.SendAddedClassEmailTaskDTO;
+import exception.QueueJobException;
 import exception.StudentAlreadyInClassException;
 import model.Class;
 import model.Student;
 import model.Teacher;
-import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import task.quartz.SendAddedClassEmailTask;
@@ -21,7 +21,7 @@ public class ClassService {
         return Optional.ofNullable(clazz.getStudents());
     }
 
-    public void addStudentToClass(Student student, Class clazz) throws SchedulerException, StudentAlreadyInClassException {
+    public void addStudentToClass(Student student, Class clazz) throws QueueJobException, StudentAlreadyInClassException {
         if (clazz.getStudents().containsKey(student.getCode())) {
             logger.info("Student with code {} already exists in class {}", student.getCode(), clazz.getCode());
 //            throw new StudentAlreadyInClassException();

@@ -1,10 +1,10 @@
 package task;
 
 import dto.TaskDTO;
-import org.quartz.SchedulerException;
+import exception.QueueJobException;
 
 public interface QueueJob {
-    public void init() throws SchedulerException;
-    public void shutdown() throws SchedulerException;
-    public void dispatchTask(String taskUUID, TaskDTO taskDTO) throws SchedulerException;
+    public void init() throws QueueJobException;
+    public void shutdown() throws QueueJobException;
+    public void dispatchTask(String taskUUID, TaskDTO taskDTO) throws QueueJobException;
 }
