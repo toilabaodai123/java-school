@@ -5,13 +5,18 @@ import dto.AddStudentToClassDTO;
 import dto.CreateClassDTO;
 import dto.CreateStudentDTO;
 import dto.RemoveStudentFromClassDTO;
+import exception.ClassWithCodeDoesntExist;
 import exception.StudentAlreadyInClassException;
+import exception.StudentWithCodeDoesntExist;
 import model.Class;
 import model.Student;
 import model.Teacher;
 import exception.QueueJobException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import repository.ClassRepository;
+import repository.StudentRepository;
+import repository.TeacherRepository;
 import service.ClassService;
 import service.StudentService;
 import service.TeacherService;
@@ -32,9 +37,10 @@ public class Main {
         logger.info("Starting...");
 
         Main.start();
-        var studentService = new StudentService();
-        var teacherService = new TeacherService();
-        var classService = new ClassService();
+
+        var studentService = DependencyContainer.getStudentService();
+        var teacherService = DependencyContainer.getTeacherService();
+        var classService = DependencyContainer.getClassService();
 
         var createStudentDTO_1 = new CreateStudentDTO("code-1","name-1","email-1");
         var createStudentDTO_2 = new CreateStudentDTO("code-2","name-2","email-2");
@@ -65,6 +71,13 @@ public class Main {
 
         }catch(StudentAlreadyInClassException e){
 //            logger.error("Student with code {} already exists in class {}, message error: {}", student.getCode(), class1.getCode(),e.getMessage());
+        } catch (ClassWithCodeDoesntExist e) {
+//            throw new RuntimeException(e);
+            logger.info(e.getMessage());
+        } catch (StudentWithCodeDoesntExist e) {
+//            throw new RuntimeException(e);
+            logger.info(e.getMessage());
+
         }
 
 

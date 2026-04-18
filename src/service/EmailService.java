@@ -9,11 +9,15 @@ import org.slf4j.LoggerFactory;
 import java.util.Properties;
 
 public class EmailService {
-    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
+    private static int instanceCounter = 0;
     private final Session session;
 
     public EmailService(String host, int port) {
+        ++instanceCounter;
+        logger.info("Email Service Constructor   {}",instanceCounter);
+
         Properties props = new Properties();
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.port", String.valueOf(port));

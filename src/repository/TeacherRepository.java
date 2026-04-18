@@ -3,6 +3,8 @@ package repository;
 import database.DatabaseConnection;
 import model.Student;
 import model.Teacher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TeacherRepository {
+    private static final Logger logger = LoggerFactory.getLogger(TeacherRepository.class);
+    private static int instanceCounter = 0;
+
+    public TeacherRepository(){
+        ++instanceCounter;
+        logger.info("TeacherRepository constructor {}",instanceCounter);
+    }
+
     public List<Teacher> getAllTeachers() throws SQLException {
         List<Teacher> teacherList = new ArrayList<>();
         String query = "SELECT * FROM teachers";

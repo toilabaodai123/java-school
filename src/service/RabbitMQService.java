@@ -19,9 +19,15 @@ import java.util.concurrent.TimeoutException;
 public class RabbitMQService implements QueueJob {
     private static final Logger logger = LoggerFactory.getLogger(RabbitMQService.class);
     private static final String EXCHANGE_NAME = "send_added_class_email";
+    private static int instanceCounter = 0;
 
     private Connection connection;
     private Channel channel;
+
+    public RabbitMQService(){
+        ++instanceCounter;
+        logger.info("RabbitMQService Service Constructor  {}",instanceCounter);
+    }
 
     public void init() throws QueueJobException {
         HashMap<String, String> config = Main.getConfig();

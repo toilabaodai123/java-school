@@ -5,11 +5,21 @@ import dto.TaskDTO;
 import exception.QueueJobException;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import task.QueueJob;
 import task.quartz.GeneralQuartzJob;
 
 public class QuartzService implements QueueJob {
     public static Scheduler scheduler;
+
+    private static final Logger logger = LoggerFactory.getLogger(QuartzService.class);
+    private static int instanceCounter = 0;
+
+    public QuartzService(){
+        ++instanceCounter;
+        logger.info("QuartzService Service Constructor {}",instanceCounter);
+    }
 
     public void init() throws QueueJobException {
         try {

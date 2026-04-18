@@ -2,6 +2,8 @@ package repository;
 
 import database.DatabaseConnection;
 import model.Student;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +15,13 @@ import java.util.List;
 import java.util.Optional;
 
 public class StudentRepository {
+    private static final Logger logger = LoggerFactory.getLogger(StudentRepository.class);
+    private static int instanceCounter = 0;
+
+    public StudentRepository(){
+        ++instanceCounter;
+        logger.info("StudentRepository constructor {}",instanceCounter);
+    }
 
     public List<Student> getAllStudents() throws SQLException {
         List<Student> studentList = new ArrayList<>();
@@ -62,11 +71,11 @@ public class StudentRepository {
         PreparedStatement pstmt = connection.prepareStatement(query);
         pstmt.setString(1, code);
         ResultSet rs = pstmt.executeQuery();
+        Student student = null;
         if(rs.next()){
-            Student student = new Student(rs.getString("name"), rs.getString("code"), rs.getString("email"));
+            student = new Student(rs.getString("name"), rs.getString("code"), rs.getString("email"));
             student.setId(rs.getLong("id"));
-            return Optional.of(student);
         }
-        return null;
+        return Optional.ofNullable(student);
     }
 }

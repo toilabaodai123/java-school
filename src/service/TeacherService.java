@@ -12,16 +12,21 @@ import java.util.List;
 
 public class TeacherService {
     private static final Logger logger = LoggerFactory.getLogger(TeacherService.class);
+    private static int instanceCounter = 0;
+    private final TeacherRepository teacherRepository;
 
-    private List<Teacher> teacherList = new ArrayList<Teacher>();
+
+    public TeacherService(TeacherRepository teacherRepository) {
+        ++instanceCounter;
+        logger.info("TeacherService constructor  {}",instanceCounter);
+        this.teacherRepository = teacherRepository;
+    }
 
     public List<Teacher> getTeacherList() throws SQLException {
-        TeacherRepository teacherRepository = new TeacherRepository();
         return teacherRepository.getAllTeachers();
     }
 
     public Teacher addTeacher(Teacher teacher) throws SQLException {
-        TeacherRepository teacherRepository = new TeacherRepository();
         return teacherRepository.createTeacher(teacher);
     }
 }

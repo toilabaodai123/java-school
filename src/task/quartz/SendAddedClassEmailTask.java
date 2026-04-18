@@ -1,14 +1,13 @@
 package task.quartz;
 
+import app.DependencyContainer;
 import app.Main;
 import com.google.gson.Gson;
 import dto.SendAddedClassEmailTaskDTO;
 import jakarta.mail.MessagingException;
-import model.Student;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.EmailService;
-import service.StudentService;
 import task.ExecutableTask;
 
 import java.sql.SQLException;
@@ -20,7 +19,7 @@ public class SendAddedClassEmailTask implements ExecutableTask {
 
     @Override
     public void execute(SendAddedClassEmailTaskDTO dto) throws SQLException {
-        var studentService = new StudentService();
+        var studentService = DependencyContainer.getStudentService();
         var student = studentService.getStudentByCode(dto.getStudentCode());
         logger.info("Handling task {}, request info: {}", dto.getTaskUUID(), new Gson().toJson(dto));
 

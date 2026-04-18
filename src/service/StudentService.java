@@ -13,9 +13,16 @@ import java.util.Optional;
 
 public class StudentService {
     private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
+    private static int instanceCounter = 0;
+    private final StudentRepository studentRepository;
+
+    public StudentService(StudentRepository studentRepository) {
+        ++instanceCounter;
+        logger.info("Student Service Constructor  {}",instanceCounter);
+        this.studentRepository = studentRepository;
+    }
 
     public Student createStudent(CreateStudentDTO createStudentDTO) throws SQLException {
-        StudentRepository studentRepository = new StudentRepository();
         Student student = new Student();
         student.setCode(createStudentDTO.getCode());
         student.setName(createStudentDTO.getName());
@@ -25,12 +32,10 @@ public class StudentService {
     }
 
     public List<Student> getStudentList() throws SQLException {
-        StudentRepository studentRepository = new StudentRepository();
         return studentRepository.getAllStudents();
     }
 
     public Optional<Student> getStudentByCode(String code) throws SQLException {
-        StudentRepository studentRepository = new StudentRepository();
         return studentRepository.getStudentByCode(code);
     }
 }

@@ -10,10 +10,24 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import model.Class;
 import model.Teacher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import service.TeacherService;
 
 public class ClassRepository {
+    private static final Logger logger = LoggerFactory.getLogger(ClassRepository.class);
+
+    private static int instanceCounter = 0;
+
+    public ClassRepository(){
+        ++instanceCounter;
+        logger.info("ClassRepository constructor {}",instanceCounter);
+    }
+
     public List<Class> getClasses() throws SQLException {
         List<Class> classList = new ArrayList<>();
         String query = "SELECT * FROM classes";
@@ -50,7 +64,7 @@ public class ClassRepository {
         return clazz;
     }
 
-    public Class getClassByCode(String code) throws SQLException {
+    public Optional<Class> getClassByCode(String code) throws SQLException {
         Connection connection = DatabaseConnection.getConnection();
         String query = "SELECT * FROM classes WHERE code = ?";
         PreparedStatement pstmt = connection.prepareStatement(query);
@@ -61,7 +75,7 @@ public class ClassRepository {
             clazz.setId(rs.getLong("id"));
             clazz.setCode(rs.getString("code"));
         }
-        return clazz;
+        return Optional.of(clazz);
     }
 
     public void addStudentToClass(Class clazz, Student student) throws SQLException {
