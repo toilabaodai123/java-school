@@ -20,32 +20,12 @@ public class Class {
         students = new HashMap<>();
     }
 
-    public Optional<Teacher> getTeacher() {
-        return teacher;
-    }
-
-    public void setTeacher(Teacher teacher) {
-        this.teacher = Optional.ofNullable(teacher);
-    }
-
-    public void addStudent(Student student) {
-        this.students.put(student.getCode(), student);
-    }
-
-    public HashMap<String, Student> getStudents() {
-        return students;
-    }
-
     public String getCode() {
         return code;
     }
 
     public void setCode(String code) {
         this.code = code;
-    }
-
-    public long getId() {
-        return id;
     }
 
     public void setId(long id) {

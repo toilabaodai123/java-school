@@ -6,6 +6,8 @@ import repository.TaskRepository;
 import repository.TeacherRepository;
 import service.*;
 
+import java.util.Optional;
+
 public class DependencyContainer {
     private final static StudentRepository studentRepository = new StudentRepository();
     private final static ClassRepository classRepository = new ClassRepository();
@@ -19,31 +21,31 @@ public class DependencyContainer {
     private final static StudentService studentService = new StudentService(studentRepository);
     private final static TeacherService teacherService = new TeacherService(teacherRepository);
 
-    public static StudentRepository getStudentRepository() {
-        return studentRepository;
-    }
-
-    public static ClassRepository getClassRepository() {
-        return classRepository;
-    }
-
-    public static TaskRepository getTaskRepository() {
-        return taskRepository;
-    }
-
-    public static TeacherRepository getTeacherRepository() {
-        return teacherRepository;
-    }
-
     public static ClassService getClassService() {
+        printCaller("getClassService");
         return classService;
     }
 
     public static StudentService getStudentService() {
+        printCaller("getStudentService");
         return studentService;
     }
 
     public static TeacherService getTeacherService() {
+        printCaller("getClassService");
         return teacherService;
+    }
+
+    private static void printCaller(String message) {
+        StackWalker walker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+
+        // Use walk to process the stream of stack frames
+        Optional<String> callerClassName = walker.walk(frames ->
+                frames.skip(2) // Skip the current method (printCaller)
+                        .findFirst()
+                        .map(StackWalker.StackFrame::getClassName)
+        );
+
+        System.out.println(message + " Called by: " + callerClassName.orElse("Unknown"));
     }
 }

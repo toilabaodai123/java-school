@@ -124,7 +124,7 @@ public class TaskManager {
 
     private static void initQueueJob() throws QueueJobException {
         HashMap<String, String> config = Main.getConfig();
-        queueJob = getQueueJobService(config);
+        QueueJob queueJob = getQueueJobService(config);
     }
 
     public static HashMap<String, String> getTaskMapping() {

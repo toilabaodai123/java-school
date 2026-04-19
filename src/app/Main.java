@@ -17,14 +17,14 @@ import org.slf4j.LoggerFactory;
 import repository.ClassRepository;
 import repository.StudentRepository;
 import repository.TeacherRepository;
-import service.ClassService;
-import service.StudentService;
-import service.TeacherService;
+import service.*;
+import task.QueueJob;
 import task.TaskManager;
 
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -33,6 +33,12 @@ import java.util.Optional;
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     private static HashMap<String, String> config;
+
+    private Map<String, QueueJob> supportedProviders = new HashMap<>(){{
+        put("inmemory",new QuartzService());
+        put("rabbitmq", new RabbitMQService());
+    }};
+
     public static void main(String[] args) throws InterruptedException, QueueJobException, StudentAlreadyInClassException, SQLException {
         logger.info("Starting...");
 
@@ -105,8 +111,8 @@ public class Main {
         logger.info("Shutting down completed!...");
     }
 
-    private static HashMap<String, String> initConfig(){
-        var config = new HashMap<String, String>();
+    private static HashMap<String, Object> initConfig(){
+        var config = new HashMap<String, Object>();
         config.put("task.queue","internal");
 //        config.put("task.queue.driver","rabbitmq");
         config.put("task.queue.host","localhost");
@@ -115,6 +121,8 @@ public class Main {
         config.put("db.url", "jdbc:mysql://localhost:3306/school");
         config.put("db.user", "school");
         config.put("db.password", "school");
+
+        config.put("queueJob", new QuartzService());
 
         return config;
     }
